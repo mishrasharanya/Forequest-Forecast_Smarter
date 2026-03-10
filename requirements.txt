@@ -6,3 +6,5 @@ matplotlib
 scipy
 arch
 yfinance
+seaborn
+datetime
