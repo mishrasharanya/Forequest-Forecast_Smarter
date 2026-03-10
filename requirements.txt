@@ -1,0 +1,8 @@
+streamlit
+python-dotenv
+pandas
+numpy
+matplotlib
+scipy
+arch
+yfinance
