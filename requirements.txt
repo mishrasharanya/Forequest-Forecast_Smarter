@@ -8,3 +8,5 @@ arch
 yfinance
 seaborn
 datetime
+langchain-community
+langchain-ollama
