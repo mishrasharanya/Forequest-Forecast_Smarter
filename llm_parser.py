@@ -3,31 +3,48 @@ import json
 from dotenv import load_dotenv
 from groq import Groq
 
-# Force .env values to override existing environment variables
 load_dotenv(override=True)
 
 _client = None
 
 
+def _get_api_key():
+    """
+    Get Groq API key from Streamlit Secrets first,
+    then local .env / environment variable.
+    """
+
+    try:
+        import streamlit as st
+
+        if "GROQ_API_KEY" in st.secrets:
+            return st.secrets["GROQ_API_KEY"]
+
+    except Exception:
+        pass
+
+    return os.getenv("GROQ_API_KEY")
+
+
 def _get_client():
     """
-    Create and cache a Groq client.
+    Create and cache Groq client.
+    Works locally and on Streamlit Cloud.
     """
+
     global _client
 
     if _client is None:
-        api_key = os.getenv("GROQ_API_KEY")
+        api_key = _get_api_key()
 
         if not api_key:
             raise RuntimeError(
-                "GROQ_API_KEY not found. Check your .env file."
+                "GROQ_API_KEY not found. Add it in Streamlit Secrets or local .env."
             )
-
-        print(f"Using API key prefix: {api_key[:8]}")
 
         if not api_key.startswith("gsk_"):
             raise RuntimeError(
-                f"Invalid Groq key format. Expected key starting with 'gsk_' but got '{api_key[:8]}...'"
+                "Invalid Groq key format. Groq keys should start with 'gsk_'."
             )
 
         _client = Groq(api_key=api_key)
@@ -37,8 +54,8 @@ def _get_client():
 
 def get_forecast_plan(user_prompt: str) -> dict:
     """
-    Convert a natural-language forecasting request
-    into a structured JSON plan.
+    Parses a forecasting prompt into a structured JSON plan
+    using Groq-hosted Llama.
     """
 
     system_msg = """
@@ -46,7 +63,7 @@ def get_forecast_plan(user_prompt: str) -> dict:
 
     Extract forecasting parameters from the user's request.
 
-    Return ONLY valid JSON:
+    Return ONLY valid JSON with these keys:
 
     {
         "model": "",
@@ -57,18 +74,24 @@ def get_forecast_plan(user_prompt: str) -> dict:
     }
 
     Rules:
-    - model should be ARIMA, GARCH, LSTM, etc.
-    - ticker should be the stock ticker.
-    - dates must be yyyy-mm-dd when available.
-    - forecast_horizon must be an integer.
+    - model should be ARIMA, GARCH, LSTM, or another forecasting model if specified.
+    - ticker should be the stock symbol.
+    - dates should be yyyy-mm-dd when available.
+    - forecast_horizon should be an integer number of days.
     - Return JSON only.
     """
 
     response = _get_client().chat.completions.create(
         model="llama-3.1-8b-instant",
         messages=[
-            {"role": "system", "content": system_msg},
-            {"role": "user", "content": user_prompt},
+            {
+                "role": "system",
+                "content": system_msg,
+            },
+            {
+                "role": "user",
+                "content": user_prompt,
+            },
         ],
         temperature=0,
         response_format={"type": "json_object"},
@@ -87,7 +110,7 @@ def get_forecast_plan(user_prompt: str) -> dict:
 
         except Exception as e:
             raise ValueError(
-                f"Could not parse JSON response:\n{output}"
+                f"Could not parse model response as JSON:\n{output}"
             ) from e
 
 
@@ -97,6 +120,7 @@ def chat(
 ) -> str:
     """
     General-purpose ForeQuest chatbot.
+    Used by Streamlit chatbot and option analysis.
     """
 
     response = _get_client().chat.completions.create(
@@ -106,9 +130,10 @@ def chat(
                 "role": "system",
                 "content": (
                     "You are ForeQuest AI, a financial forecasting assistant. "
-                    "Help users understand volatility forecasting, stock prices, "
-                    "risk analysis, option pricing, GARCH models, ARIMA models, "
-                    "and financial markets."
+                    "Help users understand volatility forecasting, GARCH models, "
+                    "American option pricing, Longstaff-Schwartz Monte Carlo, "
+                    "Quasi-Monte Carlo simulation, risk analysis, and stock market behavior. "
+                    "Keep explanations clear, practical, and beginner-friendly."
                 ),
             },
             {
