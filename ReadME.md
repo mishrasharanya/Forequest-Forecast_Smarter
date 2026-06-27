@@ -1,78 +1,69 @@
-# ForeQuest- Forecast Smarter
+# ForeQuest — Forecast Smarter
 
-##  Description
+## Overview
 
-ForeQuest is a Streamlit-based application that empowers users to forecast financial market volatility and perform American option pricing with real data. By selecting a company and a timeframe (last 3, 6 months, or 1 year), users can visualize historical and forecasted annualized volatility, gaining insights into market patterns such as volatility clustering and mean reversion.
+ForeQuest is an interactive financial analytics platform built with Streamlit that combines volatility forecasting, American option pricing, and AI-powered financial explanations into a single application.
 
-Project Highlights
-- Volatility Forecasting: Uses the GARCH model to forecast volatility, visualizing both historical and predicted annualized volatility.
+The platform allows users to analyze publicly traded stocks, forecast future volatility using GARCH models, and price American-style options using Quasi-Monte Carlo simulation with Longstaff-Schwartz regression.
 
-- Model Diagnostics: Incorporates best practices from time series analysis, including Q-Q plots, residual plots, ACF plots, and the Ljung-Box test to ensure model validity.
+In addition, ForeQuest integrates a Groq-hosted Llama chatbot that helps users interpret forecasts, option pricing outputs, and financial concepts through natural language interactions.
 
-- Option Pricing: Implements American option pricing using Quasi Monte Carlo simulations, providing detailed summaries (intrinsic value, time value, break-even, and required price movement).
+---
 
-- Interpretability: Designed for clarity and educational value, making complex financial modeling accessible and actionable.
+## Features
 
-## Project Motivation
-ForeQuest was built to deepen understanding of financial modeling, volatility dynamics, and real-world risk quantification using Python. The tool is designed to be both interpretable and practical, providing valuable insights for anyone interested in market risk and derivatives.
+### Volatility Forecasting
 
-## Methodology
-Model Validation:
-Before finalizing forecasts, the model was validated using Q-Q plots (normality of residuals), residual plots (checking for heteroscedasticity), ACF plots (autocorrelation), and the Ljung-Box test (independence of residuals). All diagnostics indicated a well-specified model.
+- Downloads real-time stock market data using Yahoo Finance.
+- Computes daily log returns.
+- Automatically selects the best GARCH(p,q) model using Akaike Information Criterion (AIC).
+- Forecasts future annualized volatility.
+- Visualizes historical and forecasted volatility.
+- Captures volatility clustering and mean reversion dynamics.
 
-Option Pricing:
-American options are priced using Quasi Monte Carlo simulations, with comprehensive outputs for decision support.
+### GARCH Diagnostics
 
-##  Requirements
+- Q-Q Plot
+- Residual Time Series Plot
+- Residual Autocorrelation Function (ACF)
+- Standardized Residual Analysis
 
-To run the Python scripts in this repository, you'll need the following:
+### American Option Pricing
 
-- Python 3.8+
-- Packages:
-  - `numpy`
-  - `matplotlib`
-  - `pandas`
-  - `scipy`
-  - `ezc3d` (for loading `.c3d` motion capture files) 
+- Quasi-Monte Carlo simulation with Sobol sequences
+- GARCH-driven stochastic volatility
+- Longstaff-Schwartz Least Squares Monte Carlo (LSM)
 
-Install them using:
+### AI Financial Assistant
+
+- Explain volatility forecasts
+- Interpret option pricing outputs
+- Answer financial questions
+- Explain GARCH modeling
+- Parse natural-language forecasting requests
+
+---
+
+## Installation
 
 ```bash
-pip install numpy matplotlib pandas scipy ezc3d
+pip install -r requirements.txt
 ```
 
-## File Description:
+## Environment Variables
 
-#### 1. app.py
-Main Streamlit app. Integrates the forecasting component and provides the user interface.
+Create a `.env` file:
 
-#### 2.forecast_model.py
-Contains core logic for volatility forecasting (GARCH) and American option pricing.
-
-#### 3. llm_parser.py
-Parses text using large language models (LLMs) for enhanced interpretability or user queries.
-
-#### 4. test_forecast.py
-Unit tests for forecast_model.py, including validation of plots and forecast accuracy.
-
-#### 5. test_llm.py
-Unit tests for llm_parser.py, ensuring the LLM integration functions as expected.
-
-
-#### Reproducing Results:
-1. install dependencies:
-```bash
-pip install streamlit numpy pandas matplotlib arch
+```env
+GROQ_API_KEY=your_groq_api_key
 ```
 
-2. Run to start app:
+## Run
+
 ```bash
 streamlit run app.py
 ```
 
-3. Unit Testing:
-```bash
-python unittest test_forecast.py
-python unittest test_llm.py
-```
+## Author
 
+Sharanya Mishra
